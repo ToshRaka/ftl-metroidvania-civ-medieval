@@ -1,5 +1,8 @@
 extends Node2D
 
+onready var CollisionMouse := $CollisionMouse
+
+var selected : bool = false
 var speed : float = 100
 var path := PoolVector2Array() setget set_path
 
