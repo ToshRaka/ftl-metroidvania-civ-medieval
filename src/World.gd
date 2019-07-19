@@ -25,16 +25,19 @@ func _input(event : InputEvent) -> void :
 	if event is InputEventMouseButton:
 		if event.pressed:
 			if event.button_index == BUTTON_RIGHT: # Set navigation target phase
-				for character in characters:
-					if character.selected:
+				for character in selected_characters:
+					if character.selected: # Redundant / useless?
 						var path := nav.get_simple_path(character.global_position, event.global_position)
 						character.path = path
 						character.selected = false # Arbitrarily deselect character once they got a target
 			elif event.button_index == BUTTON_LEFT: # Select phase
 				var was_selected : bool = false
+				selected_characters = []
 				for character in characters:
 					character.selected = character.CollisionMouse.hover
-					was_selected = was_selected or character.selected
+					if character.selected:
+						selected_characters.append(character)
+						was_selected = true
 				
 				# No character was selected, start a rectangular selection instead
 				if not was_selected:
@@ -45,6 +48,14 @@ func _input(event : InputEvent) -> void :
 					select_anchor = event.global_position
 		
 		else: # Mouse button released
+			if large_selection:
+				selected_characters = []
+				var rect : Rect2 = Rect2(selector.get_begin(), selector.get_end()-selector.get_begin())
+				for character in characters:
+					character.selected = rect.has_point(character.global_position)
+					if character.selected:
+						selected_characters.append(character)
+			
 			large_selection = false
 			selector.visible = false
 
