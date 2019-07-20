@@ -29,7 +29,6 @@ func _input(event : InputEvent) -> void :
 					if character.selected: # Redundant / useless?
 						var path := nav.get_simple_path(character.global_position, event.global_position)
 						character.path = path
-						character.selected = false # Arbitrarily deselect character once they got a target
 			elif event.button_index == BUTTON_LEFT: # Select phase
 				var was_selected : bool = false
 				selected_characters = []
