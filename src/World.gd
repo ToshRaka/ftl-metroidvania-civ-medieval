@@ -1,7 +1,7 @@
 extends Node
 
 onready var nav : Navigation2D = $Navigation2D
-onready var characters := [$Character1, $Character2]
+onready var characters := [$Character1, $Character2, $Character3, $Character4, $Character5, $Character6]
 onready var selector : ColorRect = $SelectCharacter
 
 var large_selection : bool = false

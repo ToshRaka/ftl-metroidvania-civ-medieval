@@ -1,4 +1,4 @@
-extends Node2D
+extends KinematicBody2D
 
 onready var CollisionMouse := $CollisionMouse
 onready var AnimationPlayer := $AnimationPlayer
@@ -14,27 +14,24 @@ func _ready() -> void:
 	set_process(false)
 
 func _process(delta : float) -> void:
-	move_along_path(speed * delta)
+	move_along_path(delta)
 	
-func move_along_path(distance : float) -> void:
-	if not path:
+func move_along_path(delta : float) -> void:
+	if not path or path.size() == 0:
 		AnimationPlayer.play("Idle")
 		return
-	var point := position
-	while path.size():
-		var distance_to_target := point.distance_to(path[0])
-		if distance <= distance_to_target:
-			position = point.linear_interpolate(path[0], distance / distance_to_target)
-			play_move_animation(position - point)
-			break
-		distance -= distance_to_target
-		point = path[0]
-		if distance < 0:
-			position = path[0]
-			set_process(false)
-			break
-		path.remove(0)
 	
+	var distance : float = speed * delta
+	var distance_to_target : float = position.distance_to(path[0])
+	
+	var d : Vector2 = (path[0] - position).normalized()
+	
+	play_move_animation(d)
+	if distance >= distance_to_target:
+		move_and_collide(d * distance_to_target)
+		path.remove(0)
+	else:
+		move_and_collide(d * distance)
 
 func play_move_animation(speed_vector: Vector2) -> void:
 	if speed_vector.abs().angle_to(Y_AXIS) < VERTICAL_ANIMATION_ANGLE:
