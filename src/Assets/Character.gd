@@ -10,11 +10,29 @@ var selected : bool = false
 var speed : float = 100
 var path := PoolVector2Array() setget set_path
 
-func _ready() -> void:
-	set_process(false)
-
 func _process(delta : float) -> void:
 	move_along_path(delta)
+
+func orthogonal(v : Vector2) -> Vector2:
+	return Vector2(v.y, -v.x)
+
+func reach_delta(rel : Vector2) -> bool:
+	# Try to go to the specified target
+	# If there's a collision in between, find a way around
+	# Way around = slide along the collision tangent
+	
+	var collision : KinematicCollision2D = move_and_collide(rel)
+	if collision:
+		var tangent : Vector2 = orthogonal(collision.normal)
+		var s : int = sign(collision.collider_velocity.dot(tangent))
+		var new_rel : Vector2 = rel.abs() * tangent
+		
+		# When the collider is moving, try to move towards it to get passed them quickly
+		if s != 0:
+			new_rel *= -s
+		move_and_collide(new_rel)
+		return false
+	return true
 	
 func move_along_path(delta : float) -> void:
 	if not path or path.size() == 0:
@@ -28,10 +46,10 @@ func move_along_path(delta : float) -> void:
 	
 	play_move_animation(d)
 	if distance >= distance_to_target:
-		move_and_collide(d * distance_to_target)
+		reach_delta(d * distance_to_target)
 		path.remove(0)
 	else:
-		move_and_collide(d * distance)
+		reach_delta(d * distance)
 
 func play_move_animation(speed_vector: Vector2) -> void:
 	if speed_vector.abs().angle_to(Y_AXIS) < VERTICAL_ANIMATION_ANGLE:
@@ -47,7 +65,3 @@ func play_move_animation(speed_vector: Vector2) -> void:
 
 func set_path(value : PoolVector2Array) -> void:
 	path = value
-	
-	if value.size() == 0:
-		return
-	set_process(true)
