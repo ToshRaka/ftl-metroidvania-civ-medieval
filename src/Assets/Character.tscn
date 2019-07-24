@@ -4,14 +4,13 @@
 [ext_resource path="res://LPC_Base_Assets/sprites/people/soldier.png" type="Texture" id=2]
 [ext_resource path="res://Assets/CollisionMouse.gd" type="Script" id=3]
 
-[sub_resource type="RectangleShape2D" id=7]
+[sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 14.2156, 7.61256 )
 
-[sub_resource type="RectangleShape2D" id=1]
+[sub_resource type="RectangleShape2D" id=2]
 extents = Vector2( 16, 28 )
 
-[sub_resource type="Animation" id=2]
-resource_name = "Down"
+[sub_resource type="Animation" id=3]
 length = 0.9
 loop = true
 tracks/0/type = "value"
@@ -27,8 +26,7 @@ tracks/0/keys = {
 "values": [ 18, 19, 20, 21, 22, 23, 24, 25, 26 ]
 }
 
-[sub_resource type="Animation" id=3]
-resource_name = "Idle"
+[sub_resource type="Animation" id=4]
 loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath("Sprite:frame")
@@ -43,8 +41,7 @@ tracks/0/keys = {
 "values": [ 18 ]
 }
 
-[sub_resource type="Animation" id=4]
-resource_name = "Left"
+[sub_resource type="Animation" id=5]
 length = 0.9
 loop = true
 tracks/0/type = "value"
@@ -60,8 +57,7 @@ tracks/0/keys = {
 "values": [ 9, 10, 11, 12, 13, 14, 15, 16, 17 ]
 }
 
-[sub_resource type="Animation" id=5]
-resource_name = "Right"
+[sub_resource type="Animation" id=6]
 length = 0.9
 loop = true
 tracks/0/type = "value"
@@ -77,8 +73,7 @@ tracks/0/keys = {
 "values": [ 27, 28, 29, 30, 31, 32, 33, 34, 35 ]
 }
 
-[sub_resource type="Animation" id=6]
-resource_name = "Up"
+[sub_resource type="Animation" id=7]
 length = 0.9
 loop = true
 tracks/0/type = "value"
@@ -107,7 +102,7 @@ region_rect = Rect2( 192, 128, 64, 64 )
 
 [node name="CollisionNavigation" type="CollisionShape2D" parent="."]
 visible = false
-shape = SubResource( 7 )
+shape = SubResource( 1 )
 
 [node name="CollisionMouse" type="Area2D" parent="."]
 visible = false
@@ -117,14 +112,14 @@ collision_mask = 2
 script = ExtResource( 3 )
 
 [node name="Shape" type="CollisionShape2D" parent="CollisionMouse"]
-shape = SubResource( 1 )
+shape = SubResource( 2 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 autoplay = "Idle"
-anims/Down = SubResource( 2 )
-anims/Idle = SubResource( 3 )
-anims/Left = SubResource( 4 )
-anims/Right = SubResource( 5 )
-anims/Up = SubResource( 6 )
+anims/Down = SubResource( 3 )
+anims/Idle = SubResource( 4 )
+anims/Left = SubResource( 5 )
+anims/Right = SubResource( 6 )
+anims/Up = SubResource( 7 )
 [connection signal="mouse_entered" from="CollisionMouse" to="CollisionMouse" method="_on_CollisionMouse_mouse_entered"]
 [connection signal="mouse_exited" from="CollisionMouse" to="CollisionMouse" method="_on_CollisionMouse_mouse_exited"]
