@@ -27,8 +27,10 @@ func reach_delta(rel : Vector2) -> bool:
 		# When the collider is moving, try to move towards it to get passed them quickly
 		if s != 0:
 			new_rel *= -s
+		play_move_animation(new_rel)
 		move_and_collide(new_rel)
 		return false
+	play_move_animation(rel)
 	return true
 	
 func move_along_path(delta : float) -> void:
@@ -40,7 +42,6 @@ func move_along_path(delta : float) -> void:
 	var distance_to_target : float = position.distance_to(path[0])
 	
 	var d : Vector2 = path[0] - position
-	play_move_animation(d)
 	if distance >= distance_to_target:
 		if reach_delta(d):
 			path.remove(0)
