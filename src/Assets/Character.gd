@@ -20,13 +20,9 @@ func reach_delta(rel : Vector2) -> bool:
 	
 	var collision : KinematicCollision2D = move_and_collide(rel, false)
 	if collision:
-		var tangent : Vector2 = collision.normal.tangent()
-		var s : int = sign(collision.collider_velocity.dot(tangent))
+		var tangent : Vector2 = collision.normal.tangent().normalized()
 		var new_rel : Vector2 = rel.length() * tangent
 		
-		# When the collider is moving, try to move towards it to get passed them quickly
-		if s != 0:
-			new_rel *= -s
 		play_move_animation(new_rel)
 		move_and_collide(new_rel)
 		return false

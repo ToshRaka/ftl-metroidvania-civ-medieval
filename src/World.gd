@@ -29,7 +29,7 @@ func tweak_rectangle(begin : Vector2, end : Vector2):
 func distinct_destinations(lst : Array, dest : Vector2) -> Array:
 	var n : int = len(lst)
 	var w : int = ceil(sqrt(n))
-	var h : int = ceil(n / w)
+	var h : int = ceil(float(n) / w)
 	var ret : Array = Array()
 	
 	dest -= Vector2(largest_character_collision.x * w / 2.0, largest_character_collision.y * h / 2.0)
