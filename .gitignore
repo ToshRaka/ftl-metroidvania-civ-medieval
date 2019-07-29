@@ -6,3 +6,5 @@ src/export_presets.cfg
 
 # Mono-specific ignores
 .mono/
+*.png~
+*.kra~
