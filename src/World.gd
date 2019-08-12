@@ -4,6 +4,8 @@ onready var nav : Navigation2D = $Navigation2D
 onready var characters := [$Character1, $Character2]
 onready var selector : ColorRect = $SelectCharacter
 
+const TeamMemberHUD := preload("res://Assets/TeamMemberHUD.tscn")
+
 var large_selection : bool = false
 var select_anchor : Vector2 = Vector2()
 var selected_characters = []
@@ -20,6 +22,12 @@ func tweak_rectangle(begin : Vector2, end : Vector2):
 		end.y = temp
 	
 	return [begin, end]
+
+func _ready():
+	for character in characters:
+		var member = TeamMemberHUD.instance()
+		member.set_character(character)
+		$Team.add_child(member)
 
 func _input(event : InputEvent) -> void :
 	if event is InputEventMouseButton:
