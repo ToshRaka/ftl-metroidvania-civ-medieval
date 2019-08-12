@@ -140,8 +140,8 @@ func play_move_animation(speed_vector: Vector2) -> void:
 		else:
 			anim = WalkAnim.LEFT
 	
-	last_anims.push_back(anim)
 	last_anims.pop_front()
+	last_anims.push_back(anim)
 	
 	match get_anim():
 		WalkAnim.UP:
