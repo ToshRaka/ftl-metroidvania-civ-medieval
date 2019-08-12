@@ -1,7 +1,7 @@
 extends Node
 
 onready var nav : Navigation2D = $Navigation2D
-onready var characters := [$Character1, $Character2, $Character3, $Character4, $Character5, $Character6]
+onready var characters := get_tree().get_nodes_in_group("Allies")
 onready var selector : ColorRect = $SelectCharacter
 
 const TeamMemberHUD := preload("res://Assets/TeamMemberHUD.tscn")
@@ -11,6 +11,12 @@ var select_anchor : Vector2 = Vector2()
 var selected_characters = []
 
 func _ready():
+	for character in get_tree().get_nodes_in_group("Allies"):
+		character.set_ennemies(get_tree().get_nodes_in_group("Ennemies"))
+	for character in get_tree().get_nodes_in_group("Ennemies"):
+		character.set_ennemies(get_tree().get_nodes_in_group("Allies"))
+	
+	# HUD
 	for character in characters:
 		var member = TeamMemberHUD.instance()
 		member.set_character(character)

@@ -10,9 +10,20 @@ const VERTICAL_ANIMATION_ANGLE : float = 0.3
 signal died
 signal hp_changed
 
+class CoreStats:
+	var sight_range : float = 100.0
+	
+class WeaponStats:
+	var attack_range : float = 10.0
+	var attack_amount : float = 5.0
+
 class FighterStats:
+	var team_id : int = 0
+	
 	var max_hp : float = 200.0
 	var hp : float = max_hp setget set_hp
+	
+	var weapon : WeaponStats = WeaponStats.new()
 	
 	func set_hp(value : float) -> void:
 		hp = value
@@ -22,7 +33,9 @@ class FighterStats:
 		emit_signal("hp_changed", hp, max_hp)
 
 var char_name : String = "Gaston" setget set_charname
+var core_stats : CoreStats = CoreStats.new()
 var stats : FighterStats = FighterStats.new()
+var ennemies : Array setget set_ennemies
 
 var selected : bool = false
 var speed : float = 100
@@ -179,6 +192,9 @@ func set_path(value : PoolVector2Array) -> void:
 func set_charname(value : String) -> void:
 	# Small reminder to implement a name generator :)
 	char_name = value
+	
+func set_ennemies(value : Array) -> void:
+	ennemies = value
 
 func _unhandled_key_input(event: InputEventKey) -> void:
 	# For HP bar testing
