@@ -10,11 +10,19 @@ const VERTICAL_ANIMATION_ANGLE : float = 0.3
 signal died
 signal hp_changed
 
-var max_hp : float = 200.0
-var hp := max_hp setget set_hp
+class FighterStats:
+	var max_hp : float = 200.0
+	var hp : float = max_hp setget set_hp
+	
+	func set_hp(value : float) -> void:
+		hp = value
+		if hp <= 0.0:
+			hp = 0.0
+			emit_signal("died")
+		emit_signal("hp_changed", hp, max_hp)
 
 var char_name : String = "Gaston" setget set_charname
-
+var stats : FighterStats = FighterStats.new()
 
 var selected : bool = false
 var speed : float = 100
@@ -31,7 +39,7 @@ func _ready() -> void:
 	for i in range(16):
 		last_anims.push_back(WalkAnim.DOWN)
   
-  HPBar.update_hp(hp, max_hp)
+  HPBar.update_hp(stats.hp, stats.max_hp)
 
 func get_anim() -> int:
 	var tmp := [0, 0, 0, 0]
@@ -168,13 +176,6 @@ func play_move_animation(speed_vector: Vector2) -> void:
 func set_path(value : PoolVector2Array) -> void:
 	path = value
 
-func set_hp(value : float) -> void:
-	hp = value
-	if hp <= 0.0:
-		hp = 0.0
-		emit_signal("died")
-	emit_signal("hp_changed", hp, max_hp)
-
 func set_charname(value : String) -> void:
 	# Small reminder to implement a name generator :)
 	char_name = value
@@ -182,4 +183,4 @@ func set_charname(value : String) -> void:
 func _unhandled_key_input(event: InputEventKey) -> void:
 	# For HP bar testing
 	if event.is_action_released("ui_page_down"):
-		set_hp(hp - 5*max_hp/100)
+		stats.set_hp(stats.hp - 5*stats.max_hp/100)

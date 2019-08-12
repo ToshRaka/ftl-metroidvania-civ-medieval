@@ -8,7 +8,7 @@ var character
 func _ready() -> void:
 	if character:
 		nameLabel.text = character.char_name
-		update_hp(character.hp, character.max_hp)
+		update_hp(character.stats.hp, character.stats.max_hp)
 
 func set_character(value) -> void:
 	character = value
