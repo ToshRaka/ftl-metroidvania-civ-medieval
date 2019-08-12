@@ -50,8 +50,9 @@ func _input(event : InputEvent) -> void :
 					for i in range(len(selected_characters)):
 						var character : KinematicBody2D = selected_characters[i]
 						if character.selected: # Redundant / useless?
-							var path := nav.get_simple_path(character.global_position, destinations[i])
+							var path := nav.get_simple_path(character.global_position, destinations[0])
 							character.path = path
+							character.flock = selected_characters
 			elif event.button_index == BUTTON_LEFT: # Select phase
 				var was_selected : bool = false
 				selected_characters = []
