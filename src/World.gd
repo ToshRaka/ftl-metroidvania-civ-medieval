@@ -53,6 +53,7 @@ func _input(event : InputEvent) -> void :
 							var path := nav.get_simple_path(character.global_position, destinations[0])
 							character.path = path
 							character.flock = selected_characters
+							character.idling = 0.0
 			elif event.button_index == BUTTON_LEFT: # Select phase
 				var was_selected : bool = false
 				selected_characters = []

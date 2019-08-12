@@ -10,6 +10,7 @@ var selected : bool = false
 var speed : float = 100
 var path := PoolVector2Array() setget set_path
 var flock : Array = Array()
+var idling : float = 0
 
 # Flock functions
 func flock_away_from_others() -> Vector2:
@@ -33,6 +34,16 @@ func flock_cohesion() -> Vector2:
 	centrum /= len(flock)
 	return (centrum - global_position).normalized()
 
+func flock_idling_index() -> int:
+	var id_max : int = -1
+	var idling_max : float = 0.0
+	for i in range(len(flock)):
+		var other = flock[i]
+		if other.idling > 1 and (id_max == -1 or idling > idling_max):
+			id_max = i
+			idling_max = other.idling
+	return id_max
+
 func _process(delta : float) -> void:
 	move_along_path(delta)
 
@@ -55,6 +66,7 @@ func reach_delta(rel : Vector2) -> bool:
 func move_along_path(delta : float) -> void:
 	if not path or path.size() == 0:
 		AnimationPlayer.play("Idle")
+		idling += delta
 		return
 	
 	var distance : float = speed * delta
@@ -63,18 +75,19 @@ func move_along_path(delta : float) -> void:
 	var to_target : Vector2 = (path[0] - position).normalized()
 	var to_away : Vector2 = flock_away_from_others()
 	var to_cohesion : Vector2 = flock_cohesion()
-	var d : Vector2 = .6 * to_target + .3 * to_away + .1 * to_cohesion
+	var d : Vector2 = .6 * to_target + .2 * to_away + .2 * to_cohesion
 	var rel : Vector2 = distance * d
 	
-	#distance = to_target.dot(d)
+	var leader_index : int = flock_idling_index()
+	if leader_index > -1 and (flock[leader_index].global_position - global_position).length_squared() < 1000:
+		path.remove(0)
+		return
 	
 	if distance >= distance_to_target:
 		if reach_delta(d):
 			path.remove(0)
 	else:
 		reach_delta(d.normalized() * distance)
-		
-		
 
 func play_move_animation(speed_vector: Vector2) -> void:
 	if speed_vector.abs().angle_to(Y_AXIS) < VERTICAL_ANIMATION_ANGLE:
