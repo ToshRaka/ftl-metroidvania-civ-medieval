@@ -13,8 +13,10 @@ var selected_characters = []
 func _ready():
 	for character in get_tree().get_nodes_in_group("Allies"):
 		character.set_enemies(get_tree().get_nodes_in_group("Enemies"))
+		character.connect("navigation_changed", self, "_on_Character_navigation_changed")
 	for character in get_tree().get_nodes_in_group("Enemies"):
 		character.set_enemies(get_tree().get_nodes_in_group("Allies"))
+		character.connect("navigation_changed", self, "_on_Character_navigation_changed")
 	
 	# HUD
 	for character in characters:
@@ -48,6 +50,7 @@ func _input(event : InputEvent) -> void :
 							character.path = path
 							character.flock = selected_characters
 							character.idling = 0.0
+							character.chasing = false
 			elif event.button_index == BUTTON_LEFT: # Select phase
 				var was_selected : bool = false
 				selected_characters = []
@@ -84,3 +87,11 @@ func _input(event : InputEvent) -> void :
 			var end : Vector2 = temp[1]
 			selector.set_begin(begin)
 			selector.set_end(end)
+			
+func _on_Character_navigation_changed(character : Character, target : Vector2) -> void:
+	var path := nav.get_simple_path(character.global_position, target)
+	print(path.size())
+	character.path = path
+	character.flock = [character]
+	character.idling = 0.0
+	character.chasing = true

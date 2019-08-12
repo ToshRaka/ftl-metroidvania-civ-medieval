@@ -10,6 +10,7 @@ const VERTICAL_ANIMATION_ANGLE : float = 0.3
 
 signal died
 signal hp_changed
+signal navigation_changed
 
 class CoreStats:
 	var sight_range : float = 100.0
@@ -36,6 +37,7 @@ var stats : FighterStats = FighterStats.new()
 var weapon : WeaponStats = WeaponStats.new()
 var enemies : Array setget set_enemies
 var next_hit : float = 0
+var chasing : bool = false
 
 var selected : bool = false
 var speed : float = 100
@@ -109,27 +111,39 @@ func flock_idling_index() -> int:
 func _process(delta : float) -> void:
 	if not fight(delta):
 		move_along_path(delta)
-	
+
+# Returns the "first" (not the closest) enemy Character within range
+func enemy_in_range(r : float) -> Character:
+	var to_attack : Character = null
+	for enemy in enemies:
+		var d : Vector2 = enemy.global_position - global_position
+		if d.length_squared() <= r * r:
+			return enemy
+	return null
+
 func fight(delta : float) -> bool:
 	# Simple algorithm
 	# 1. If an enemy is within attack range, attack them
 	# 2. Otherwise, if an enemy is within sight range, go visit them
 	# 3. Otherwise, do nothing
 	
-	var to_attack : Character = null
-	for enemy in enemies:
-		var d : Vector2 = enemy.global_position - global_position
-		if d.length_squared() <= weapon.attack_range * weapon.attack_range:
-			to_attack = enemy
-			break
-			
 	if next_hit > 0.0:
 		next_hit -= delta
 	
-	if to_attack and next_hit <= 0.0:
-		to_attack.take_damage(weapon.attack_amount)
-		next_hit = 1.0 / weapon.hits_per_second
+	# 1.
+	var to_attack : Character = enemy_in_range(weapon.attack_range)
+	if to_attack:
+		if next_hit <= 0.0:
+			to_attack.take_damage(weapon.attack_amount)
+			next_hit = 1.0 / weapon.hits_per_second
 		return true
+	
+	# 2.
+	if chasing:
+		return false
+	var to_follow : Character = enemy_in_range(core_stats.sight_range)
+	if to_follow:
+		emit_signal("navigation_changed", self, to_follow.global_position)
 	return false
 
 func reach_delta(rel : Vector2) -> bool:
