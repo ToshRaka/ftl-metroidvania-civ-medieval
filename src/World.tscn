@@ -491,17 +491,17 @@ position = Vector2( 393.965, 274.646 )
 position = Vector2( 443.707, 173.654 )
 
 [node name="Character7" parent="." groups=[
-"Ennemies",
+"Enemies",
 ] instance=ExtResource( 5 )]
 position = Vector2( 883.238, 516.193 )
 
 [node name="Character8" parent="." groups=[
-"Ennemies",
+"Enemies",
 ] instance=ExtResource( 5 )]
 position = Vector2( 926.209, 480.589 )
 
 [node name="Character9" parent="." groups=[
-"Ennemies",
+"Enemies",
 ] instance=ExtResource( 5 )]
 position = Vector2( 818.168, 522.332 )
 

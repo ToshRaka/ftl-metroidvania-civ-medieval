@@ -1,4 +1,5 @@
 extends KinematicBody2D
+class_name Character
 
 onready var CollisionMouse := $CollisionMouse
 onready var HPBar := $MarginContainer/HPBar
@@ -14,8 +15,9 @@ class CoreStats:
 	var sight_range : float = 100.0
 	
 class WeaponStats:
-	var attack_range : float = 10.0
-	var attack_amount : float = 5.0
+	var attack_range : float = 24.0
+	var attack_amount : float = 20.0
+	var hits_per_second : float = 1.0
 
 class FighterStats:
 	var team_id : int = 0
@@ -23,19 +25,17 @@ class FighterStats:
 	var max_hp : float = 200.0
 	var hp : float = max_hp setget set_hp
 	
-	var weapon : WeaponStats = WeaponStats.new()
-	
 	func set_hp(value : float) -> void:
 		hp = value
 		if hp <= 0.0:
 			hp = 0.0
-			emit_signal("died")
-		emit_signal("hp_changed", hp, max_hp)
 
 var char_name : String = "Gaston" setget set_charname
 var core_stats : CoreStats = CoreStats.new()
 var stats : FighterStats = FighterStats.new()
-var ennemies : Array setget set_ennemies
+var weapon : WeaponStats = WeaponStats.new()
+var enemies : Array setget set_enemies
+var next_hit : float = 0
 
 var selected : bool = false
 var speed : float = 100
@@ -107,7 +107,30 @@ func flock_idling_index() -> int:
 	return id_max
 
 func _process(delta : float) -> void:
-	move_along_path(delta)
+	if not fight(delta):
+		move_along_path(delta)
+	
+func fight(delta : float) -> bool:
+	# Simple algorithm
+	# 1. If an enemy is within attack range, attack them
+	# 2. Otherwise, if an enemy is within sight range, go visit them
+	# 3. Otherwise, do nothing
+	
+	var to_attack : Character = null
+	for enemy in enemies:
+		var d : Vector2 = enemy.global_position - global_position
+		if d.length_squared() <= weapon.attack_range * weapon.attack_range:
+			to_attack = enemy
+			break
+			
+	if next_hit > 0.0:
+		next_hit -= delta
+	
+	if to_attack and next_hit <= 0.0:
+		to_attack.take_damage(weapon.attack_amount)
+		next_hit = 1.0 / weapon.hits_per_second
+		return true
+	return false
 
 func reach_delta(rel : Vector2) -> bool:
 	# Try to go to the specified target
@@ -193,10 +216,16 @@ func set_charname(value : String) -> void:
 	# Small reminder to implement a name generator :)
 	char_name = value
 	
-func set_ennemies(value : Array) -> void:
-	ennemies = value
+func set_enemies(value : Array) -> void:
+	enemies = value
+	
+func take_damage(damage : float) -> void:
+	stats.set_hp(stats.hp - damage)
+	if stats.hp <= 0.0:
+		emit_signal("died")
+	emit_signal("hp_changed", stats.hp, stats.max_hp)
 
 func _unhandled_key_input(event: InputEventKey) -> void:
 	# For HP bar testing
 	if event.is_action_released("ui_page_down"):
-		stats.set_hp(stats.hp - 5*stats.max_hp/100)
+		take_damage(5*stats.max_hp/100)

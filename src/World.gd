@@ -12,9 +12,9 @@ var selected_characters = []
 
 func _ready():
 	for character in get_tree().get_nodes_in_group("Allies"):
-		character.set_ennemies(get_tree().get_nodes_in_group("Ennemies"))
-	for character in get_tree().get_nodes_in_group("Ennemies"):
-		character.set_ennemies(get_tree().get_nodes_in_group("Allies"))
+		character.set_enemies(get_tree().get_nodes_in_group("Enemies"))
+	for character in get_tree().get_nodes_in_group("Enemies"):
+		character.set_enemies(get_tree().get_nodes_in_group("Allies"))
 	
 	# HUD
 	for character in characters:
