@@ -483,3 +483,28 @@ visible = false
 margin_right = 40.0
 margin_bottom = 40.0
 color = Color( 0.0905762, 0.205818, 0.828125, 0.25098 )
+
+[node name="Team" type="VBoxContainer" parent="."]
+light_mask = 7
+margin_left = 50.0
+margin_top = 48.0
+margin_right = 328.0
+margin_bottom = 98.0
+
+[node name="MarginContainer" type="MarginContainer" parent="Team"]
+margin_right = 278.0
+margin_bottom = 50.0
+
+[node name="ColorRect" type="ColorRect" parent="Team/MarginContainer"]
+margin_right = 278.0
+margin_bottom = 50.0
+rect_min_size = Vector2( 50, 50 )
+color = Color( 0.498039, 0.219608, 0.501961, 1 )
+
+[node name="Label" type="Label" parent="Team/MarginContainer"]
+margin_top = 18.0
+margin_right = 278.0
+margin_bottom = 32.0
+text = "Team"
+align = 1
+uppercase = true
