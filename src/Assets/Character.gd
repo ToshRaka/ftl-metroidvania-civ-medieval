@@ -85,22 +85,18 @@ func move_along_path(delta : float) -> void:
 	var to_cohesion : Vector2 = flock_cohesion()
 	var d : Vector2 = .6 * to_target + .2 * to_away + .2 * to_cohesion
 	
-	var rel : Vector2 = distance * d
-	
 	var leader_index : int = flock_idling_index()
 	if leader_index > -1:
-		#if (flock[leader_index].global_position - global_position).length_squared() < len(flock)*len(flock)*32:
-		if flock_dispersion() < 30:
+		if (flock[leader_index].global_position - global_position).length_squared() < len(flock)*len(flock)*32 \
+		or flock_dispersion() < 30:
 			path.remove(0)
 			return
-	elif flock_dispersion() < 30:
+	elif flock_dispersion() < 50:
 		d = .2 * to_target + .8 * to_away
 	
-	if distance >= distance_to_target:
-		if reach_delta(d):
-			path.remove(0)
-	else:
-		reach_delta(d.normalized() * distance)
+	reach_delta(d * distance)
+	if (global_position-path[0]).length_squared() < 32:
+		path.remove(0)
 
 func play_move_animation(speed_vector: Vector2) -> void:
 	if speed_vector.abs().angle_to(Y_AXIS) < VERTICAL_ANIMATION_ANGLE:
