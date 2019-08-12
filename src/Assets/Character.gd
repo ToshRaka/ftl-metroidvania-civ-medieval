@@ -1,12 +1,22 @@
 extends Node2D
 
 onready var CollisionMouse := $CollisionMouse
+onready var HPBar := $MarginContainer/HPBar
+
+signal died
+signal hp_changed
+
+var max_hp : float = 200.0
+var hp := max_hp setget set_hp
+
+var char_name : String = "Gaston" setget set_charname
 
 var selected : bool = false
 var speed : float = 100
 var path := PoolVector2Array() setget set_path
 
 func _ready() -> void:
+	HPBar.update_hp(hp, max_hp)
 	set_process(false)
 
 func _process(delta : float) -> void:
@@ -33,3 +43,19 @@ func set_path(value : PoolVector2Array) -> void:
 	if value.size() == 0:
 		return
 	set_process(true)
+
+func set_hp(value : float) -> void:
+	hp = value
+	if hp <= 0.0:
+		hp = 0.0
+		emit_signal("died")
+	emit_signal("hp_changed", hp, max_hp)
+
+func set_charname(value : String) -> void:
+	# Small reminder to implement a name generator :)
+	char_name = value
+
+func _unhandled_key_input(event: InputEventKey) -> void:
+	# For HP bar testing
+	if event.is_action_released("ui_page_down"):
+		set_hp(hp - 5*max_hp/100)
