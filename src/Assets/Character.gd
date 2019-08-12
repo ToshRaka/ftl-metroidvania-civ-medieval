@@ -21,18 +21,26 @@ func flock_away_from_others() -> Vector2:
 	for other in flock:
 		if other == self:
 			continue
-		v -= (other.global_position - global_position)
+		var d : Vector2 = other.global_position - global_position
+		v -= d.normalized()
 	return v.normalized()
 	
-func flock_cohesion() -> Vector2:
+func flock_centrum() -> Vector2:
 	var centrum := Vector2(0, 0)
-	if len(flock) < 2: # 1 person flock, do nothing
-		return Vector2(0, 0)
-		
 	for other in flock:
 		centrum += other.global_position
 	centrum /= len(flock)
-	return (centrum - global_position).normalized()
+	return centrum
+	
+func flock_cohesion() -> Vector2:
+	return (flock_centrum() - global_position).normalized()
+	
+func flock_dispersion() -> float:
+	var centrum : Vector2 = flock_centrum()
+	var ret : float = 0.0
+	for other in flock:
+		ret += (other.global_position - centrum).length()
+	return ret / len(flock)
 
 func flock_idling_index() -> int:
 	var id_max : int = -1
@@ -76,12 +84,17 @@ func move_along_path(delta : float) -> void:
 	var to_away : Vector2 = flock_away_from_others()
 	var to_cohesion : Vector2 = flock_cohesion()
 	var d : Vector2 = .6 * to_target + .2 * to_away + .2 * to_cohesion
+	
 	var rel : Vector2 = distance * d
 	
 	var leader_index : int = flock_idling_index()
-	if leader_index > -1 and (flock[leader_index].global_position - global_position).length_squared() < 1000:
-		path.remove(0)
-		return
+	if leader_index > -1:
+		#if (flock[leader_index].global_position - global_position).length_squared() < len(flock)*len(flock)*32:
+		if flock_dispersion() < 30:
+			path.remove(0)
+			return
+	elif flock_dispersion() < 30:
+		d = .2 * to_target + .8 * to_away
 	
 	if distance >= distance_to_target:
 		if reach_delta(d):
