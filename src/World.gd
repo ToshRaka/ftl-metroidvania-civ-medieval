@@ -26,32 +26,19 @@ func tweak_rectangle(begin : Vector2, end : Vector2):
 	
 	return [begin, end]
 
-func distinct_destinations(lst : Array, dest : Vector2) -> Array:
-	var n : int = len(lst)
-	var w : int = ceil(sqrt(n))
-	var h : int = ceil(float(n) / w)
-	var ret : Array = Array()
-	
-	dest -= Vector2(largest_character_collision.x * w / 2.0, largest_character_collision.y * h / 2.0)
-	
-	for y in range(h):
-		for x in range(w):
-			if y*w+x >= n:
-				return ret
-			ret.append(dest + 2.5 * Vector2(largest_character_collision.x * x, largest_character_collision.y * y))
-	return ret
-
 func _input(event : InputEvent) -> void :
 	if event is InputEventMouseButton:
 		if event.pressed:
 			if event.button_index == BUTTON_RIGHT: # Set navigation target phase
 				if len(selected_characters) > 0:
-					var destinations := distinct_destinations(selected_characters, event.global_position)
+					var destination : Vector2 = event.global_position
 					for i in range(len(selected_characters)):
 						var character : KinematicBody2D = selected_characters[i]
 						if character.selected: # Redundant / useless?
-							var path := nav.get_simple_path(character.global_position, destinations[i])
+							var path := nav.get_simple_path(character.global_position, destination)
 							character.path = path
+							character.flock = selected_characters
+							character.idling = 0.0
 			elif event.button_index == BUTTON_LEFT: # Select phase
 				var was_selected : bool = false
 				selected_characters = []
