@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/watergrass.png-4a9e1f811529d2cedaff839f06f71eb9.stex"
+path="res://.import/healthBarFill.png-2f27e5a4f6ef04f9230e87cb26ea7af5.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://LPC_Base_Assets/tiles/watergrass.png"
-dest_files=[ "res://.import/watergrass.png-4a9e1f811529d2cedaff839f06f71eb9.stex" ]
+source_file="res://Assets/textures/HUD/healthBarFill.png"
+dest_files=[ "res://.import/healthBarFill.png-2f27e5a4f6ef04f9230e87cb26ea7af5.stex" ]
 
 [params]
 
