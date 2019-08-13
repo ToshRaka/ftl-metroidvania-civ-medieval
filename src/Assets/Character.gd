@@ -10,6 +10,7 @@ const VERTICAL_ANIMATION_ANGLE : float = 0.3
 
 signal died
 signal hp_changed
+signal hp_low
 signal navigation_changed
 
 enum State {IDLE, MOVE_TO_TARGET, FIGHT, CHASING_LOCKED, CHASING_UNLOCKED, FLEE, RETREAT, DEAD}
@@ -127,7 +128,8 @@ func is_enemy_in_range(enemy : Character, r : float) -> bool:
 func enemy_in_range(r : float) -> Character:
 	var to_attack : Character = null
 	for enemy in enemies:
-		if is_enemy_in_range(enemy, r):
+		# TODO: remove enemy from enemies if enmy.state == State.DEAD
+		if enemy.state != State.DEAD and is_enemy_in_range(enemy, r):
 			return enemy
 	return null
 	
@@ -171,34 +173,41 @@ func ia_process(delta : float) -> void:
 		State.MOVE_TO_TARGET:
 			move_along_path(delta)
 		State.FIGHT:
-			if not is_enemy_in_range(fight_enemy, weapon.attack_range):
+			if fight_enemy.state == State.DEAD:
+				state = State.IDLE
+			elif not is_enemy_in_range(fight_enemy, weapon.attack_range):
 				state_chase(fight_enemy)
 				fight_enemy = null
 			else:
 				fight(delta)
 		State.CHASING_LOCKED:
-			var to_attack : Character = enemy_in_range(weapon.attack_range)
-			if to_attack:
-				state_attack_enemy(to_attack)
+			if chase_enemy.state == State.DEAD:
+				state = State.IDLE
 			else:
-				chase_lock -= delta
-				if chase_lock <= 0.0:
-					state = State.CHASING_UNLOCKED
-	
-				move_along_path(delta)
+				var to_attack : Character = enemy_in_range(weapon.attack_range)
+				if to_attack:
+					state_attack_enemy(to_attack)
+				else:
+					chase_lock -= delta
+					if chase_lock <= 0.0:
+						state = State.CHASING_UNLOCKED
+		
+					move_along_path(delta)
 		State.CHASING_UNLOCKED:
-			var to_attack : Character = enemy_in_range(weapon.attack_range)
-			if to_attack:
-				state_attack_enemy(to_attack)
+			if chase_enemy.state == State.DEAD:
+				state = State.IDLE
 			else:
-				move_along_path(delta)
+				var to_attack : Character = enemy_in_range(weapon.attack_range)
+				if to_attack:
+					state_attack_enemy(to_attack)
+				else:
+					move_along_path(delta)
 		State.FLEE:
 			pass
 		State.RETREAT:
 			pass
 		State.DEAD:
 			pass
-			
 
 func fight(delta : float) -> void:
 	if state != State.FIGHT:
@@ -301,9 +310,17 @@ func take_damage(damage : float) -> void:
 	stats.set_hp(stats.hp - damage)
 	if stats.hp <= 0.0:
 		emit_signal("died")
+	elif stats.hp <= 5 * stats.max_hp / 100:
+		emit_signal("hp_low")
 	emit_signal("hp_changed", stats.hp, stats.max_hp)
 
 func _unhandled_key_input(event: InputEventKey) -> void:
 	# For HP bar testing
 	if event.is_action_released("ui_page_down"):
 		take_damage(5*stats.max_hp/100)
+
+func _on_Character_died():
+	state = State.DEAD
+
+func _on_Character_hp_low():
+	state = State.FLEE

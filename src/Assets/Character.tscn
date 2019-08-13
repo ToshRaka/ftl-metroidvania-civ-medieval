@@ -138,6 +138,8 @@ anims/Idle = SubResource( 4 )
 anims/Left = SubResource( 5 )
 anims/Right = SubResource( 6 )
 anims/Up = SubResource( 7 )
+[connection signal="died" from="." to="." method="_on_Character_died"]
 [connection signal="hp_changed" from="." to="MarginContainer/HPBar" method="_on_Character_hp_changed"]
+[connection signal="hp_low" from="." to="." method="_on_Character_hp_low"]
 [connection signal="mouse_entered" from="CollisionMouse" to="CollisionMouse" method="_on_CollisionMouse_mouse_entered"]
 [connection signal="mouse_exited" from="CollisionMouse" to="CollisionMouse" method="_on_CollisionMouse_mouse_exited"]
