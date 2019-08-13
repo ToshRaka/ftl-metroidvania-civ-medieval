@@ -11,16 +11,16 @@ var selected_characters = []
 
 func _input(event : InputEvent) -> void :
 	if event.is_action_pressed("right_click"):
-		selection.clearArea()				
-    if len(selected_characters) > 0:
+		selection.clearArea()
+		if len(selected_characters) > 0:
 			var destination : Vector2 = event.global_position
 			for i in range(len(selected_characters)):
-        var character : KinematicBody2D = selected_characters[i]
-			  if character.selected:
-				  var path := nav.get_simple_path(character.global_position, destination)
-				  character.path = path
-				  character.flock = selected_characters
-				  character.idling = 0.0
+				var character : KinematicBody2D = selected_characters[i]
+				if character.selected:
+					var path := nav.get_simple_path(character.global_position, destination)
+					character.path = path
+					character.flock = selected_characters
+					character.idling = 0.0
 
 func resetSelected() -> void:
 	selected_characters = []

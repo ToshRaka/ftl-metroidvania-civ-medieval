@@ -453,7 +453,6 @@ polygons = [ PoolIntArray( 0, 1, 2, 3, 4, 5 ), PoolIntArray( 0, 1, 2, 3, 4, 5 ),
 
 [node name="World" type="Node"]
 script = ExtResource( 1 )
-[connection signal="area_entered" from="Selection/SelectionArea" to="." method="_on_SelectionArea_area_entered"]
 
 [node name="Navigation2D" type="Navigation2D" parent="."]
 
@@ -486,6 +485,8 @@ position = Vector2( 634.007, 149.099 )
 script = ExtResource( 6 )
 
 [node name="SelectionArea" type="Area2D" parent="Selection"]
+collision_layer = 64
+collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Selection/SelectionArea"]
 shape = SubResource( 14 )
@@ -518,4 +519,4 @@ margin_bottom = 32.0
 text = "Team"
 align = 1
 uppercase = true
-
+[connection signal="area_entered" from="Selection/SelectionArea" to="." method="_on_SelectionArea_area_entered"]
