@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://Assets/Character.gd" type="Script" id=1]
 [ext_resource path="res://LPC_Base_Assets/sprites/people/soldier.png" type="Texture" id=2]
@@ -104,11 +104,9 @@ frame = 18
 region_rect = Rect2( 192, 128, 64, 64 )
 
 [node name="CollisionNavigation" type="CollisionShape2D" parent="."]
-visible = false
 shape = SubResource( 1 )
 
 [node name="CollisionMouse" type="Area2D" parent="."]
-visible = false
 position = Vector2( 0.922073, -17.5194 )
 collision_layer = 2
 collision_mask = 2
