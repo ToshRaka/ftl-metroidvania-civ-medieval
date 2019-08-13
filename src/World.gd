@@ -46,11 +46,7 @@ func _input(event : InputEvent) -> void :
 					for i in range(len(selected_characters)):
 						var character : KinematicBody2D = selected_characters[i]
 						if character.selected: # Redundant / useless?
-							var path := nav.get_simple_path(character.global_position, destination)
-							character.path = path
-							character.flock = selected_characters
-							character.idling = 0.0
-							character.chasing = false
+							character.state_move_to_target(destination, selected_characters)
 			elif event.button_index == BUTTON_LEFT: # Select phase
 				var was_selected : bool = false
 				selected_characters = []
@@ -88,10 +84,12 @@ func _input(event : InputEvent) -> void :
 			selector.set_begin(begin)
 			selector.set_end(end)
 			
-func _on_Character_navigation_changed(character : Character, target : Vector2) -> void:
+func _on_Character_navigation_changed(character : Character, target : Vector2, flock : Array) -> void:
 	var path := nav.get_simple_path(character.global_position, target)
-	print(path.size())
 	character.path = path
-	character.flock = [character]
+	character.flock = flock
 	character.idling = 0.0
-	character.chasing = true
+	character.chasing = false
+	
+	#character.flock = [character]
+	#character.chasing = true

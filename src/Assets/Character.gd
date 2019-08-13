@@ -12,6 +12,12 @@ signal died
 signal hp_changed
 signal navigation_changed
 
+enum State {IDLE, MOVE_TO_TARGET, FIGHT, CHASING_LOCKED, CHASING_UNLOCKED, FLEE, RETREAT, DEAD}
+var state : int = State.IDLE
+var fight_enemy : Character = null
+var chase_enemy : Character = null
+var chase_lock : float # seconds before chasing gets unlocked
+
 class CoreStats:
 	var sight_range : float = 100.0
 	
@@ -109,42 +115,100 @@ func flock_idling_index() -> int:
 	return id_max
 
 func _process(delta : float) -> void:
-	if not fight(delta):
-		move_along_path(delta)
+	#if not fight(delta):
+	#	move_along_path(delta)
+	ia_process(delta)
+		
+func is_enemy_in_range(enemy : Character, r : float) -> bool:
+	var d : Vector2 = enemy.global_position - global_position
+	return d.length_squared() <= r * r
 
 # Returns the "first" (not the closest) enemy Character within range
 func enemy_in_range(r : float) -> Character:
 	var to_attack : Character = null
 	for enemy in enemies:
-		var d : Vector2 = enemy.global_position - global_position
-		if d.length_squared() <= r * r:
+		if is_enemy_in_range(enemy, r):
 			return enemy
 	return null
-
-func fight(delta : float) -> bool:
-	# Simple algorithm
-	# 1. If an enemy is within attack range, attack them
-	# 2. Otherwise, if an enemy is within sight range, go visit them
-	# 3. Otherwise, do nothing
 	
+func state_attack_enemy(enemy : Character) -> void:
+	if state == State.IDLE \
+	or state == State.MOVE_TO_TARGET \
+	or state == State.CHASING_LOCKED \
+	or state == State.CHASING_UNLOCKED:
+		fight_enemy = enemy
+		state = State.FIGHT
+	
+func state_move_to_target(target : Vector2, _flock : Array) -> void:
+	if state == State.IDLE \
+	or state == State.FIGHT:
+		emit_signal("navigation_changed", self, target, _flock)
+		state = State.MOVE_TO_TARGET
+
+func state_stop_move_to_target() -> void:
+	if state == State.MOVE_TO_TARGET:
+		state = State.IDLE
+		
+func state_chase(enemy : Character) -> void:
+	if state == State.IDLE \
+	or state == State.FIGHT:
+		chase_enemy = enemy
+		chase_lock = 1.0
+		emit_signal("navigation_changed", self, enemy.global_position, [self])
+		state = State.CHASING_LOCKED
+	
+func ia_process(delta : float) -> void:
+	match state:
+		State.IDLE:
+			var to_attack : Character = enemy_in_range(weapon.attack_range)
+			if to_attack:
+				state_attack_enemy(to_attack)
+			else:
+				var to_chase : Character = enemy_in_range(core_stats.sight_range)
+				if to_chase:
+					state_chase(to_chase)
+				idling += delta
+		State.MOVE_TO_TARGET:
+			move_along_path(delta)
+		State.FIGHT:
+			if not is_enemy_in_range(fight_enemy, weapon.attack_range):
+				state_chase(fight_enemy)
+				fight_enemy = null
+			else:
+				fight(delta)
+		State.CHASING_LOCKED:
+			var to_attack : Character = enemy_in_range(weapon.attack_range)
+			if to_attack:
+				state_attack_enemy(to_attack)
+			else:
+				chase_lock -= delta
+				if chase_lock <= 0.0:
+					state = State.CHASING_UNLOCKED
+	
+				move_along_path(delta)
+		State.CHASING_UNLOCKED:
+			var to_attack : Character = enemy_in_range(weapon.attack_range)
+			if to_attack:
+				state_attack_enemy(to_attack)
+			else:
+				move_along_path(delta)
+		State.FLEE:
+			pass
+		State.RETREAT:
+			pass
+		State.DEAD:
+			pass
+			
+
+func fight(delta : float) -> void:
+	if state != State.FIGHT:
+		return
 	if next_hit > 0.0:
 		next_hit -= delta
-	
-	# 1.
-	var to_attack : Character = enemy_in_range(weapon.attack_range)
-	if to_attack:
-		if next_hit <= 0.0:
-			to_attack.take_damage(weapon.attack_amount)
-			next_hit = 1.0 / weapon.hits_per_second
-		return true
-	
-	# 2.
-	if chasing:
-		return false
-	var to_follow : Character = enemy_in_range(core_stats.sight_range)
-	if to_follow:
-		emit_signal("navigation_changed", self, to_follow.global_position)
-	return false
+
+	if next_hit <= 0.0:
+		fight_enemy.take_damage(weapon.attack_amount)
+		next_hit = 1.0 / weapon.hits_per_second
 
 func reach_delta(rel : Vector2) -> bool:
 	# Try to go to the specified target
@@ -170,7 +234,7 @@ func reach_delta(rel : Vector2) -> bool:
 func move_along_path(delta : float) -> void:
 	if not path or path.size() == 0:
 		AnimationPlayer.play("Idle")
-		idling += delta
+		state_stop_move_to_target()
 		return
 	
 	var distance : float = speed * delta
