@@ -104,7 +104,6 @@ frame = 18
 region_rect = Rect2( 192, 128, 64, 64 )
 
 [node name="CollisionNavigation" type="CollisionShape2D" parent="."]
-visible = false
 shape = SubResource( 1 )
 
 [node name="CollisionMouse" type="Area2D" parent="."]

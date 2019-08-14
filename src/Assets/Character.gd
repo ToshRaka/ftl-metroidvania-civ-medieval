@@ -75,10 +75,7 @@ func get_anim() -> int:
 			id_max = i
 	return id_max
 
-
 func _process(delta : float) -> void:
-	#if not fight(delta):
-	#	move_along_path(delta)
 	ia_process(delta)
 		
 func is_enemy_in_range(enemy : Character, r : float) -> bool:
@@ -216,10 +213,12 @@ func move_along_path(delta : float) -> void:
 	var to_away : Vector2 = flock.away_from_others(self)
 	var to_cohesion : Vector2 = flock.cohesion(self)
 	var d : Vector2 = .6 * to_target + .2 * to_away + .2 * to_cohesion
+
 	var required_rel : Vector2 = d * distance
 	var filtered_rel : Vector2 = .8 * required_rel + .2 * previous_velocity
 	
 	reach_delta(filtered_rel)
+
 	var is_close : bool = (global_position-path[0]).length_squared() < flock.size()*(32*32)
 	if path.size() > 1:
 		if is_close:

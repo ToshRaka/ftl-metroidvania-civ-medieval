@@ -1,10 +1,11 @@
-[gd_scene load_steps=19 format=2]
+[gd_scene load_steps=21 format=2]
 
 [ext_resource path="res://World.gd" type="Script" id=1]
 [ext_resource path="res://LPC_Base_Assets/tiles/grass.png" type="Texture" id=2]
 [ext_resource path="res://LPC_Base_Assets/tiles/watergrass.png" type="Texture" id=3]
 [ext_resource path="res://LPC_Base_Assets/tiles/holek.png" type="Texture" id=4]
 [ext_resource path="res://Assets/Character.tscn" type="PackedScene" id=5]
+[ext_resource path="res://Assets/Selection.gd" type="Script" id=6]
 
 [sub_resource type="NavigationPolygon" id=1]
 vertices = PoolVector2Array( 0, 0, 32, 0, 32, 32, 0, 32 )
@@ -448,6 +449,8 @@ polygons = [ PoolIntArray( 0, 1, 2, 3, 4, 5 ), PoolIntArray( 0, 1, 2, 3, 4, 5 ),
 37/shapes = [  ]
 37/z_index = 0
 
+[sub_resource type="RectangleShape2D" id=14]
+
 [node name="World" type="Node"]
 script = ExtResource( 1 )
 
@@ -505,10 +508,30 @@ position = Vector2( 926.209, 480.589 )
 ] instance=ExtResource( 5 )]
 position = Vector2( 818.168, 522.332 )
 
-[node name="SelectCharacter" type="ColorRect" parent="."]
+[node name="Character3" parent="." instance=ExtResource( 5 )]
+position = Vector2( 713.896, 283.252 )
+
+[node name="Character4" parent="." instance=ExtResource( 5 )]
+position = Vector2( 689.779, 188.29 )
+
+[node name="Character5" parent="." instance=ExtResource( 5 )]
+position = Vector2( 584.265, 250.091 )
+
+[node name="Character6" parent="." instance=ExtResource( 5 )]
+position = Vector2( 634.007, 149.099 )
+
+[node name="Selection" type="Node" parent="."]
+script = ExtResource( 6 )
+
+[node name="SelectionArea" type="Area2D" parent="Selection"]
+collision_layer = 64
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Selection/SelectionArea"]
+shape = SubResource( 14 )
+
+[node name="SelectionRect" type="ColorRect" parent="Selection"]
 visible = false
-margin_right = 40.0
-margin_bottom = 40.0
 color = Color( 0.0905762, 0.205818, 0.828125, 0.25098 )
 
 [node name="Team" type="VBoxContainer" parent="."]
@@ -536,3 +559,4 @@ margin_bottom = 32.0
 text = "Team"
 align = 1
 uppercase = true
+[connection signal="area_entered" from="Selection/SelectionArea" to="." method="_on_SelectionArea_area_entered"]
