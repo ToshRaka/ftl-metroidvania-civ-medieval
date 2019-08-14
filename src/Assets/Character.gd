@@ -141,22 +141,20 @@ func ia_process(delta : float) -> void:
 			if chase_enemy.state == State.DEAD:
 				state = State.IDLE
 			else:
-				var to_attack : Character = enemy_in_range(weapon.attack_range)
-				if to_attack:
-					state_attack_enemy(to_attack)
+				if is_enemy_in_range(chase_enemy, weapon.attack_range):
+					state_attack_enemy(chase_enemy)
 				else:
 					chase_lock -= delta
 					if chase_lock <= 0.0:
 						state = State.CHASING_UNLOCKED
-		
 					move_along_path(delta)
 		State.CHASING_UNLOCKED:
+			# TODO: -> CHASING_LOCKED if new, closer target detected
 			if chase_enemy.state == State.DEAD:
 				state = State.IDLE
 			else:
-				var to_attack : Character = enemy_in_range(weapon.attack_range)
-				if to_attack:
-					state_attack_enemy(to_attack)
+				if is_enemy_in_range(chase_enemy, weapon.attack_range):
+					state_attack_enemy(chase_enemy)
 				else:
 					move_along_path(delta)
 		State.FLEE:
