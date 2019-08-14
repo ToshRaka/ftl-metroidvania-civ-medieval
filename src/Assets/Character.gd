@@ -56,8 +56,8 @@ var last_anims : Array = Array()
 func _ready() -> void:
 	for i in range(16):
 		last_anims.push_back(WalkAnim.DOWN)
-  
-  HPBar.update_hp(stats.hp, stats.max_hp)
+
+	HPBar.update_hp(stats.hp, stats.max_hp)
 
 func get_anim() -> int:
 	var tmp := [0, 0, 0, 0]
@@ -103,6 +103,7 @@ func state_move_to_target(p : PoolVector2Array) -> void:
 		var tmp := PoolVector2Array()
 		tmp.append_array(p)
 		path = tmp
+		state = State.MOVE_TO_TARGET
 
 func state_stop_move_to_target() -> void:
 	if state == State.MOVE_TO_TARGET:
