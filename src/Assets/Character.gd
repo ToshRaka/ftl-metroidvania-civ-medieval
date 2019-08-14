@@ -97,11 +97,12 @@ func state_attack_enemy(enemy : Character) -> void:
 func state_move_to_target(p : PoolVector2Array) -> void:
 	if state == State.IDLE \
 	or state == State.MOVE_TO_TARGET \
-	or state == State.FIGHT:
+	or state == State.FIGHT \
+	or state == State.CHASING_LOCKED \
+	or state == State.CHASING_UNLOCKED:
 		var tmp := PoolVector2Array()
 		tmp.append_array(p)
 		path = tmp
-		state = State.MOVE_TO_TARGET
 
 func state_stop_move_to_target() -> void:
 	if state == State.MOVE_TO_TARGET:
@@ -273,7 +274,7 @@ func _unhandled_key_input(event: InputEventKey) -> void:
 	if event.is_action_released("ui_page_down"):
 		take_damage(5*stats.max_hp/100)
 
-func _on_Character_died():
+func _on_Character_died(c : Character):
 	state = State.DEAD
 
 func _on_Character_hp_low():

@@ -64,5 +64,6 @@ func idling_index() -> int:
 func size() -> int:
 	return len(characters)
 
-func _on_Character_quit(character : Object) -> void:
+func _on_Character_quit(character : Character) -> void:
 	characters.erase(character)
+	print("Remaining characters : ", characters.size())

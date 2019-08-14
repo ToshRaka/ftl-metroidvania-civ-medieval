@@ -14,10 +14,9 @@ var enemy_flock := Flock.instance()
 func _ready():
 	for character in get_tree().get_nodes_in_group("Allies"):
 		character.set_enemies(get_tree().get_nodes_in_group("Enemies"))
-		#character.connect("navigation_changed", self, "_on_Character_navigation_changed")
+		character.connect("died", self, "_on_Character_died")
 	for character in get_tree().get_nodes_in_group("Enemies"):
 		character.set_enemies(get_tree().get_nodes_in_group("Allies"))
-		#character.connect("navigation_changed", self, "_on_Character_navigation_changed")
 		
 	select_flock.connect("navigation_changed", self, "_on_Flock_navigation_changed")
 	add_child(select_flock)
@@ -52,3 +51,7 @@ func _on_Flock_navigation_changed(flock : Object, target : Vector2) -> void:
 	var path := nav.get_simple_path(flock.centrum(), target)
 	path.remove(0)
 	flock.path = path
+
+func _on_Character_died(character : Character) -> void:
+	selected_characters.erase(character)
+	print(character)
