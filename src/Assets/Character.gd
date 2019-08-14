@@ -1,7 +1,6 @@
 extends KinematicBody2D
 class_name Character
 
-onready var CollisionMouse := $CollisionMouse
 onready var HPBar := $MarginContainer/HPBar
 onready var AnimationPlayer := $AnimationPlayer
 
@@ -45,9 +44,7 @@ var stats : FighterStats = FighterStats.new()
 var weapon : WeaponStats = WeaponStats.new()
 var enemies : Array setget set_enemies
 var next_hit : float = 0
-var chasing : bool = false
 
-var selected : bool = false
 var speed : float = 100
 var path := PoolVector2Array() setget set_path
 var flock : Object setget set_flock
@@ -55,7 +52,6 @@ var previous_velocity : Vector2 = Vector2()
 
 enum WalkAnim {UP, DOWN, LEFT, RIGHT}
 var last_anims : Array = Array()
-var duration_anim : float = 0.0
 
 func _ready() -> void:
 	for i in range(16):
@@ -84,7 +80,6 @@ func is_enemy_in_range(enemy : Character, r : float) -> bool:
 
 # Returns the "first" (not the closest) enemy Character within range
 func enemy_in_range(r : float) -> Character:
-	var to_attack : Character = null
 	for enemy in enemies:
 		# TODO: remove enemy from enemies if enmy.state == State.DEAD
 		if enemy.state != State.DEAD and is_enemy_in_range(enemy, r):
@@ -207,7 +202,6 @@ func move_along_path(delta : float) -> void:
 		return
 	
 	var distance : float = speed * delta
-	var distance_to_target : float = position.distance_to(path[0])
 	
 	var to_target : Vector2 = (path[0] - position).normalized()
 	var to_away : Vector2 = flock.away_from_others(self)

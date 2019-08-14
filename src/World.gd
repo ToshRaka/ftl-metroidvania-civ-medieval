@@ -45,7 +45,6 @@ func resetSelected() -> void:
 func _on_SelectionArea_area_entered(area: Area2D) -> void:
 	var character = area.get_parent()
 	if character:
-		character.selected = true
 		selected_characters.append(character)
 		
 func _on_Flock_navigation_changed(flock : Object, target : Vector2) -> void:
