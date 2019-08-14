@@ -2,16 +2,13 @@ extends Node
 
 onready var nav : Navigation2D = $Navigation2D
 onready var characters := get_tree().get_nodes_in_group("Allies")
+onready var selection : Node = $Selection
 
 const TeamMemberHUD := preload("res://Assets/TeamMemberHUD.tscn")
 const Flock := preload("res://Assets/Flock.tscn")
 
-onready var selection : Node = $Selection
-onready var characters := [$Character1, $Character2, $Character3, $Character4, $Character5, $Character6]
-
 var selected_characters = []
 var select_flock := Flock.instance()
-
 var enemy_flock := Flock.instance()
 
 func _ready():
@@ -39,8 +36,8 @@ func _input(event : InputEvent) -> void :
 		selection.clearArea()
 		if len(selected_characters) > 0:
 			var destination : Vector2 = event.global_position
-      select_flock.init(selected_characters)
-      select_flock.set_target(destination)
+			select_flock.init(selected_characters)
+			select_flock.set_target(destination)
 
 func resetSelected() -> void:
 	selected_characters = []
@@ -50,3 +47,8 @@ func _on_SelectionArea_area_entered(area: Area2D) -> void:
 	if character:
 		character.selected = true
 		selected_characters.append(character)
+		
+func _on_Flock_navigation_changed(flock : Object, target : Vector2) -> void:
+	var path := nav.get_simple_path(flock.centrum(), target)
+	path.remove(0)
+	flock.path = path

@@ -508,18 +508,6 @@ position = Vector2( 926.209, 480.589 )
 ] instance=ExtResource( 5 )]
 position = Vector2( 818.168, 522.332 )
 
-[node name="Character3" parent="." instance=ExtResource( 5 )]
-position = Vector2( 713.896, 283.252 )
-
-[node name="Character4" parent="." instance=ExtResource( 5 )]
-position = Vector2( 689.779, 188.29 )
-
-[node name="Character5" parent="." instance=ExtResource( 5 )]
-position = Vector2( 584.265, 250.091 )
-
-[node name="Character6" parent="." instance=ExtResource( 5 )]
-position = Vector2( 634.007, 149.099 )
-
 [node name="Selection" type="Node" parent="."]
 script = ExtResource( 6 )
 
