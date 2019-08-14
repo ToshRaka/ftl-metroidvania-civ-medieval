@@ -6,6 +6,11 @@ var characters : Array
 var path := PoolVector2Array()
 
 func init(ch : Array) -> void:
+	# First, disconnect from potential previous characters
+	for character in characters:
+		character.disconnect("died", self, "_on_Character_quit")
+		character.disconnect("quit_flock", self, "_on_Character_quit")
+	
 	characters = ch
 	for character in characters:
 		character.set_flock(self)
