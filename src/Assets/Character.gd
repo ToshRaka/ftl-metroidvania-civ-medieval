@@ -263,7 +263,7 @@ func set_flock(value : Object) -> void:
 func take_damage(damage : float) -> void:
 	stats.set_hp(stats.hp - damage)
 	if stats.hp <= 0.0:
-		emit_signal("died")
+		emit_signal("died", self)
 	elif stats.hp <= 5 * stats.max_hp / 100:
 		emit_signal("hp_low")
 	emit_signal("hp_changed", stats.hp, stats.max_hp)

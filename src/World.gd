@@ -7,7 +7,7 @@ onready var selection : Node = $Selection
 const TeamMemberHUD := preload("res://Assets/TeamMemberHUD.tscn")
 const Flock := preload("res://Assets/Flock.tscn")
 
-var selected_characters = []
+var selected_characters : Array
 var select_flock := Flock.instance()
 var enemy_flock := Flock.instance()
 
@@ -43,8 +43,9 @@ func resetSelected() -> void:
 	selected_characters = []
 
 func _on_SelectionArea_area_entered(area: Area2D) -> void:
-	var character = area.get_parent()
-	if character:
+	var character := area.get_parent()
+	var allies := get_tree().get_nodes_in_group("Allies")
+	if character and character.state != character.State.DEAD and allies.has(character):
 		selected_characters.append(character)
 		
 func _on_Flock_navigation_changed(flock : Object, target : Vector2) -> void:
