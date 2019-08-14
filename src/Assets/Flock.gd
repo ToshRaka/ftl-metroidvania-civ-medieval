@@ -65,4 +65,6 @@ func size() -> int:
 	return len(characters)
 
 func _on_Character_quit(character : Character) -> void:
+	character.disconnect("died", self, "_on_Character_quit")
+	character.disconnect("quit_flock", self, "_on_Character_quit")
 	characters.erase(character)

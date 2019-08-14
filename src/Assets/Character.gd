@@ -20,7 +20,7 @@ var chase_enemy : Character = null
 var chase_lock : float # seconds before chasing gets unlocked
 
 class CoreStats:
-	var sight_range : float = 100.0
+	var sight_range : float = 200.0
 	
 class WeaponStats:
 	var attack_range : float = 24.0
@@ -111,7 +111,8 @@ func state_stop_move_to_target() -> void:
 		
 func state_chase(enemy : Character) -> void:
 	if state == State.IDLE \
-	or state == State.FIGHT:
+	or state == State.FIGHT \
+	or state == State.CHASING_UNLOCKED:
 		chase_enemy = enemy
 		chase_lock = 1.0
 		emit_signal("quit_flock", self)
@@ -140,7 +141,7 @@ func ia_process(delta : float) -> void:
 			else:
 				fight(delta)
 		State.CHASING_LOCKED:
-			if chase_enemy.state == State.DEAD:
+			if chase_enemy.state == State.DEAD or not is_enemy_in_range(chase_enemy, core_stats.sight_range):
 				state = State.IDLE
 			else:
 				if is_enemy_in_range(chase_enemy, weapon.attack_range):
@@ -152,13 +153,21 @@ func ia_process(delta : float) -> void:
 					move_along_path(delta)
 		State.CHASING_UNLOCKED:
 			# TODO: -> CHASING_LOCKED if new, closer target detected
-			if chase_enemy.state == State.DEAD:
+			if chase_enemy.state == State.DEAD or not is_enemy_in_range(chase_enemy, core_stats.sight_range):
 				state = State.IDLE
 			else:
 				if is_enemy_in_range(chase_enemy, weapon.attack_range):
 					state_attack_enemy(chase_enemy)
 				else:
-					move_along_path(delta)
+					var to_attack : Character = enemy_in_range(weapon.attack_range)
+					if to_attack:
+						state_attack_enemy(to_attack)
+					else:
+						var to_chase_closer : Character = enemy_in_range((chase_enemy.global_position - global_position).length())
+						if to_chase_closer:
+							state_chase(to_chase_closer)
+						else:
+							move_along_path(delta)
 		State.FLEE:
 			pass
 		State.RETREAT:
@@ -286,7 +295,8 @@ func _unhandled_key_input(event: InputEventKey) -> void:
 		take_damage(5*stats.max_hp/100)
 
 func _on_Character_died(c : Character):
-	state = State.DEAD
+	if c == self:
+		state = State.DEAD
 
 func _on_Character_hp_low():
 	state = State.FLEE
