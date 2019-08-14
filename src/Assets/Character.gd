@@ -12,6 +12,7 @@ signal died
 signal hp_changed
 signal hp_low
 signal navigation_changed
+signal quit_flock
 
 enum State {IDLE, MOVE_TO_TARGET, FIGHT, CHASING_LOCKED, CHASING_UNLOCKED, FLEE, RETREAT, DEAD}
 var state : int = State.IDLE
@@ -49,8 +50,7 @@ var chasing : bool = false
 var selected : bool = false
 var speed : float = 100
 var path := PoolVector2Array() setget set_path
-var flock : Array = Array()
-var idling : float = 0
+var flock : Object setget set_flock
 var previous_velocity : Vector2 = Vector2()
 
 enum WalkAnim {UP, DOWN, LEFT, RIGHT}
@@ -75,45 +75,6 @@ func get_anim() -> int:
 			id_max = i
 	return id_max
 
-# Flock functions
-func flock_away_from_others() -> Vector2:
-	var v := Vector2(0, 0)
-	if len(flock) < 2: # 1 person flock, do nothing
-		return v
-		
-	for other in flock:
-		if other == self:
-			continue
-		var d : Vector2 = other.global_position - global_position
-		v -= d.normalized()
-	return v.normalized()
-	
-func flock_centrum() -> Vector2:
-	var centrum := Vector2(0, 0)
-	for other in flock:
-		centrum += other.global_position
-	centrum /= len(flock)
-	return centrum
-	
-func flock_cohesion() -> Vector2:
-	return (flock_centrum() - global_position).normalized()
-	
-func flock_dispersion() -> float:
-	var centrum : Vector2 = flock_centrum()
-	var ret : float = 0.0
-	for other in flock:
-		ret += (other.global_position - centrum).length()
-	return ret / len(flock)
-
-func flock_idling_index() -> int:
-	var id_max : int = -1
-	var idling_max : float = 0.0
-	for i in range(len(flock)):
-		var other = flock[i]
-		if other.idling > 1 and (id_max == -1 or idling > idling_max):
-			id_max = i
-			idling_max = other.idling
-	return id_max
 
 func _process(delta : float) -> void:
 	#if not fight(delta):
@@ -141,10 +102,12 @@ func state_attack_enemy(enemy : Character) -> void:
 		fight_enemy = enemy
 		state = State.FIGHT
 	
-func state_move_to_target(target : Vector2, _flock : Array) -> void:
+func state_move_to_target(p : PoolVector2Array) -> void:
 	if state == State.IDLE \
 	or state == State.FIGHT:
-		emit_signal("navigation_changed", self, target, _flock)
+		var tmp := PoolVector2Array()
+		tmp.append_array(p)
+		path = tmp
 		state = State.MOVE_TO_TARGET
 
 func state_stop_move_to_target() -> void:
@@ -169,7 +132,6 @@ func ia_process(delta : float) -> void:
 				var to_chase : Character = enemy_in_range(core_stats.sight_range)
 				if to_chase:
 					state_chase(to_chase)
-				idling += delta
 		State.MOVE_TO_TARGET:
 			move_along_path(delta)
 		State.FIGHT:
@@ -250,24 +212,14 @@ func move_along_path(delta : float) -> void:
 	var distance_to_target : float = position.distance_to(path[0])
 	
 	var to_target : Vector2 = (path[0] - position).normalized()
-	var to_away : Vector2 = flock_away_from_others()
-	var to_cohesion : Vector2 = flock_cohesion()
+	var to_away : Vector2 = flock.away_from_others(self)
+	var to_cohesion : Vector2 = flock.cohesion(self)
 	var d : Vector2 = .6 * to_target + .2 * to_away + .2 * to_cohesion
-	
-	var leader_index : int = flock_idling_index()
-	if leader_index > -1:
-		if (flock[leader_index].global_position - global_position).length_squared() < len(flock)*len(flock)*32 \
-		or flock_dispersion() < 30:
-			path.remove(0)
-			return
-	elif flock_dispersion() < 50:
-		d = .2 * to_target + .8 * to_away
-		
 	var required_rel : Vector2 = d * distance
 	var filtered_rel : Vector2 = .8 * required_rel + .2 * previous_velocity
 	
 	reach_delta(filtered_rel)
-	if (global_position-path[0]).length_squared() < 32:
+	if (global_position-path[0]).length_squared() < flock.size()*(32*32):
 		path.remove(0)
 
 func play_move_animation(speed_vector: Vector2) -> void:
@@ -305,6 +257,9 @@ func set_charname(value : String) -> void:
 	
 func set_enemies(value : Array) -> void:
 	enemies = value
+	
+func set_flock(value : Object) -> void:
+	flock = value
 	
 func take_damage(damage : float) -> void:
 	stats.set_hp(stats.hp - damage)

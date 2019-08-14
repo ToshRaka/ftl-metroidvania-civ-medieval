@@ -5,18 +5,23 @@ onready var characters := get_tree().get_nodes_in_group("Allies")
 onready var selector : ColorRect = $SelectCharacter
 
 const TeamMemberHUD := preload("res://Assets/TeamMemberHUD.tscn")
+const Flock := preload("res://Assets/Flock.tscn")
 
 var large_selection : bool = false
 var select_anchor : Vector2 = Vector2()
 var selected_characters = []
+var select_flock := Flock.instance()
 
 func _ready():
 	for character in get_tree().get_nodes_in_group("Allies"):
 		character.set_enemies(get_tree().get_nodes_in_group("Enemies"))
-		character.connect("navigation_changed", self, "_on_Character_navigation_changed")
+		#character.connect("navigation_changed", self, "_on_Character_navigation_changed")
 	for character in get_tree().get_nodes_in_group("Enemies"):
 		character.set_enemies(get_tree().get_nodes_in_group("Allies"))
-		character.connect("navigation_changed", self, "_on_Character_navigation_changed")
+		#character.connect("navigation_changed", self, "_on_Character_navigation_changed")
+		
+	select_flock.connect("navigation_changed", self, "_on_Flock_navigation_changed")
+	add_child(select_flock)
 	
 	# HUD
 	for character in characters:
@@ -43,10 +48,7 @@ func _input(event : InputEvent) -> void :
 			if event.button_index == BUTTON_RIGHT: # Set navigation target phase
 				if len(selected_characters) > 0:
 					var destination : Vector2 = event.global_position
-					for i in range(len(selected_characters)):
-						var character : KinematicBody2D = selected_characters[i]
-						if character.selected: # Redundant / useless?
-							character.state_move_to_target(destination, selected_characters)
+					select_flock.init(selected_characters, destination)
 			elif event.button_index == BUTTON_LEFT: # Select phase
 				var was_selected : bool = false
 				selected_characters = []
@@ -84,12 +86,7 @@ func _input(event : InputEvent) -> void :
 			selector.set_begin(begin)
 			selector.set_end(end)
 			
-func _on_Character_navigation_changed(character : Character, target : Vector2, flock : Array) -> void:
-	var path := nav.get_simple_path(character.global_position, target)
-	character.path = path
-	character.flock = flock
-	character.idling = 0.0
-	character.chasing = false
-	
-	#character.flock = [character]
-	#character.chasing = true
+func _on_Flock_navigation_changed(flock : Object, target : Vector2) -> void:
+	var path := nav.get_simple_path(flock.centrum(), target)
+	path.remove(0)
+	flock.path = path
