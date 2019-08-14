@@ -66,4 +66,3 @@ func size() -> int:
 
 func _on_Character_quit(character : Character) -> void:
 	characters.erase(character)
-	print("Remaining characters : ", characters.size())

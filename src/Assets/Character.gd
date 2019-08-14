@@ -114,7 +114,9 @@ func state_chase(enemy : Character) -> void:
 	or state == State.FIGHT:
 		chase_enemy = enemy
 		chase_lock = 1.0
-		emit_signal("navigation_changed", self, enemy.global_position, [self])
+		emit_signal("quit_flock", self)
+		emit_signal("navigation_changed", self, enemy.global_position)
+		flock = null
 		state = State.CHASING_LOCKED
 	
 func ia_process(delta : float) -> void:
@@ -204,21 +206,31 @@ func move_along_path(delta : float) -> void:
 	var distance : float = speed * delta
 	
 	var to_target : Vector2 = (path[0] - position).normalized()
-	var to_away : Vector2 = flock.away_from_others(self)
-	var to_cohesion : Vector2 = flock.cohesion(self)
-	var d : Vector2 = .6 * to_target + .2 * to_away + .2 * to_cohesion
-
-	var required_rel : Vector2 = d * distance
-	var filtered_rel : Vector2 = .8 * required_rel + .2 * previous_velocity
+	if flock:
+		var to_away : Vector2 = flock.away_from_others(self)
+		var to_cohesion : Vector2 = flock.cohesion(self)
+		var d : Vector2 = .6 * to_target + .2 * to_away + .2 * to_cohesion
 	
-	reach_delta(filtered_rel)
-
-	var is_close : bool = (global_position-path[0]).length_squared() < flock.size()*(32*32)
-	if path.size() > 1:
-		if is_close:
-			path.remove(0)
+		var required_rel : Vector2 = d * distance
+		var filtered_rel : Vector2 = .8 * required_rel + .2 * previous_velocity
+		
+		reach_delta(filtered_rel)
+	
+		var is_close : bool = (global_position-path[0]).length_squared() < flock.size()*(32*32)
+		if path.size() > 1:
+			if is_close:
+				path.remove(0)
+		else:
+			if is_close and flock.dispersion() < 32 and (flock.centrum()-path[0]).length_squared() < 32*flock.size():
+				path.remove(0)
 	else:
-		if is_close and flock.dispersion() < 32 and (flock.centrum()-path[0]).length_squared() < 32*flock.size():
+		var required_rel : Vector2 = to_target * distance
+		var filtered_rel : Vector2 = .8 * required_rel + .2 * previous_velocity
+		
+		reach_delta(filtered_rel)
+	
+		var is_close : bool = (global_position-path[0]).length_squared() < (32*32)
+		if is_close:
 			path.remove(0)
 
 func play_move_animation(speed_vector: Vector2) -> void:
