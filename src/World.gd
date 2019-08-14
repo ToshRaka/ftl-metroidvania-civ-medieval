@@ -12,6 +12,8 @@ var select_anchor : Vector2 = Vector2()
 var selected_characters = []
 var select_flock := Flock.instance()
 
+var enemy_flock := Flock.instance()
+
 func _ready():
 	for character in get_tree().get_nodes_in_group("Allies"):
 		character.set_enemies(get_tree().get_nodes_in_group("Enemies"))
@@ -22,6 +24,9 @@ func _ready():
 		
 	select_flock.connect("navigation_changed", self, "_on_Flock_navigation_changed")
 	add_child(select_flock)
+	
+	enemy_flock.init(get_tree().get_nodes_in_group("Enemies"))
+	add_child(enemy_flock)
 	
 	# HUD
 	for character in characters:
@@ -48,7 +53,8 @@ func _input(event : InputEvent) -> void :
 			if event.button_index == BUTTON_RIGHT: # Set navigation target phase
 				if len(selected_characters) > 0:
 					var destination : Vector2 = event.global_position
-					select_flock.init(selected_characters, destination)
+					select_flock.init(selected_characters)
+					select_flock.set_target(destination)
 			elif event.button_index == BUTTON_LEFT: # Select phase
 				var was_selected : bool = false
 				selected_characters = []

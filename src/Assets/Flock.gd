@@ -5,12 +5,14 @@ signal navigation_changed
 var characters : Array
 var path := PoolVector2Array()
 
-func init(ch : Array, target : Vector2) -> void:
+func init(ch : Array) -> void:
 	characters = ch
 	for character in characters:
 		character.set_flock(self)
 		character.connect("died", self, "_on_Character_quit")
 		character.connect("quit_flock", self, "_on_Character_quit")
+		
+func set_target(target : Vector2) -> void:
 	emit_signal("navigation_changed", self, target)
 	for character in characters:
 		character.state_move_to_target(path)
