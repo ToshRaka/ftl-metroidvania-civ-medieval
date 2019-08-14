@@ -104,6 +104,7 @@ func state_attack_enemy(enemy : Character) -> void:
 	
 func state_move_to_target(p : PoolVector2Array) -> void:
 	if state == State.IDLE \
+	or state == State.MOVE_TO_TARGET \
 	or state == State.FIGHT:
 		var tmp := PoolVector2Array()
 		tmp.append_array(p)
